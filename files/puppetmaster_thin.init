@@ -31,6 +31,8 @@ if [ ! -d /var/run/puppet ]; then
   mkdir -p /var/run/puppet
 fi
 
+ulimit -n ${NFILES:-1024}
+
 chown ${USER}:${GROUP} /var/run/puppet
 
 is_true() {
