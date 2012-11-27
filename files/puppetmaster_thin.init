@@ -13,6 +13,8 @@ DAEMON_OPTS=""
 SCRIPT_NAME=/usr/share/puppet/ext/rack/files/config.ru
 NAME=master
 DESC="puppet master"
+USER="puppet"
+GROUP="puppet"
 
 test -x $DAEMON || exit 0
 
@@ -21,7 +23,7 @@ test -x $DAEMON || exit 0
 REAL_DAEMON_OPTS="-P /var/run/puppet/${NAME}.pid -e stable \
  --servers ${PUPPETMASTERS} --daemonize \
  --log /var/log/puppet/puppetmaster.log \
- --user puppet --group puppet -R ${SCRIPT_NAME} --port ${PORT}"
+ --user ${USER} --group ${GROUP} -R ${SCRIPT_NAME} --port ${PORT}"
 
 . /lib/lsb/init-functions
 
@@ -29,7 +31,7 @@ if [ ! -d /var/run/puppet ]; then
   mkdir -p /var/run/puppet
 fi
 
-chown puppet:puppet /var/run/puppet
+chown ${USER}:${GROUP} /var/run/puppet
 
 is_true() {
     if [ "x$1" = "xtrue" -o "x$1" = "xyes" -o "x$1" = "x0" ] ; then
@@ -41,7 +43,8 @@ is_true() {
 
 start_puppet_master() {
     if is_true "$START" ; then
-        $DAEMON start $REAL_DAEMON_OPTS
+        start-stop-daemon --start --verbose --chuid ${USER}:${GROUP} \
+          --exec $DAEMON -- start $REAL_DAEMON_OPTS
     else
   echo ""
   echo "puppetmaster not configured to start, please edit /etc/default/puppetmaster to enable"
